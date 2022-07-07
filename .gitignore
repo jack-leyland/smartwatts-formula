@@ -189,3 +189,7 @@ tags
 
 ### IntelliJ IDEA ###
 .idea/
+
+
+# nodewatts misc
+config.json
