@@ -101,6 +101,9 @@ class PowerModel:
         :param min_intercept: Minimum value allowed for the intercept of the model
         :param max_intercept: Maximum value allowed for the intercept of the model
         """
+
+        print("learning new model")
+
         if len(self.history) < min_samples:
             return
 

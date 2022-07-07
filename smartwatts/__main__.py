@@ -155,6 +155,7 @@ def run_smartwatts(args) -> None:
     fconf = args
 
     logging.info('SmartWatts version %s using PowerAPI version %s', smartwatts_version, powerapi_version)
+    logging.info('Local nodewatts dev version')
 
     if fconf['disable-cpu-formula'] and fconf['disable-dram-formula']:
         logging.error('You need to enable at least one formula')
