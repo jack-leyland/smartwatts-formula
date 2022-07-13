@@ -1,4 +1,0 @@
-[submodule "powerapi"]
-	path = powerapi
-	url = git@github.com:jack-leyland/powerapi.git
-	branch = nodewatts
