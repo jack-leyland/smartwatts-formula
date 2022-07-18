@@ -7,23 +7,23 @@ basefrequency=$(expr ${basefrequency}\*1000 | bc | cut -d . -f 1)
 
 echo "
 {
-  \"verbose\": true,
-  \"stream\": true,
+  \"verbose\": false,
+  \"stream\": false,
   \"input\": {
     \"puller\": {
       \"model\": \"HWPCReport\",
-      \"type\": \"socket\",
-      \"uri\": \"127.0.0.1\",
-      \"port\": 8080,
-      \"collection\": \"test_hwpc\"
+      \"type\": \"mongodb\",
+      \"uri\": \"mongodb://127.0.0.1\",
+      \"db\": \"nodewatts\",
+      \"collection\": \"sensor_raw\"
     }
   },
   \"output\": {
     \"pusher_power\": {
       \"type\": \"mongodb\",
       \"uri\": \"mongodb://127.0.0.1\",
-      \"db\": \"test\",
-      \"collection\": \"prep\"
+      \"db\": \"nodewatts\",
+      \"collection\": \"cpu\"
     }
   },
   \"cpu-frequency-base\": $basefrequency,
@@ -31,6 +31,6 @@ echo "
   \"cpu-frequency-max\": $maxfrequency,
   \"cpu-error-threshold\": 2.0,
   \"disable-dram-formula\": true,
-  \"sensor-report-sampling-interval\": 1000
+  \"sensor-report-sampling-interval\": 1
 }
-" > ./config_file.json
+" > ../../nodewatts/config/smartwatts_config.json
