@@ -4,8 +4,8 @@ maxfrequency=$(lscpu -b -p=MAXMHZ | tail -n -1| cut -d , -f 1)
 minfrequency=$(lscpu -b -p=MINMHZ | tail -n -1 | cut -d , -f 1)
 basefrequency=$(lscpu | grep "Model name" | cut -d @ -f 2 | cut -d G -f 1)
 basefrequency=$(expr ${basefrequency}\*1000 | bc | cut -d . -f 1)
-maxfrequency={maxfrequency%?????}
-minfrequency={minfrequency%?????}
+maxfrequency=${maxfrequency%?????}
+minfrequency=${minfrequency%?????}
 
 echo "
 {
