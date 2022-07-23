@@ -145,18 +145,39 @@ def setup_dram_formula_actor(supervisor, fconf, route_table, report_filter, cpu_
     dram_dispatcher = supervisor.launch(SmartwattsDispatcherActor, dispatcher_start_message)
     report_filter.filter(filter_rule, dram_dispatcher)
 
+"""
+Used to replace sys.exit call whens run_smartwatts is called directly from NodeWatts 
+msg will contain the return code.
+"""
+class SmartwattsRuntimeException(Exception):
+    def __init__(self, msg, *args, **kwargs):
+        super().__init__(msg, *args, **kwargs)   
 
-def run_smartwatts(args) -> None:
+
+
+def run_smartwatts(args, direct_call=False) -> None:
     """
     Run PowerAPI with the SmartWatts formula.
     :param args: CLI arguments namespace
     :param logger: Logger to use for the actors
     """
+    """
+    NodeWatts branch note:
+    NodeWatts calls this function directly, bypassing cli parsing. 
+    Parameter added to perform the necessary config validation here rather than 
+    in module main. Done mainly to preserve the existing stand-alone cli tool 
+    functionality on this branch.
+    All calls to sys.exit() are replaced with the SmartWattsRuntimeException exception
+    """
+
+    if direct_call and not SmartwattsConfigValidator.validate(args):
+        raise InitializationException("Invalid Smartwatts configuration")
+
     fconf = args
 
     logging.info('SmartWatts version %s using PowerAPI version %s', smartwatts_version, powerapi_version)
-    logging.info('Local nodewatts dev version')
 
+    # NodeWatts's config validation ensures this will never be true 
     if fconf['disable-cpu-formula'] and fconf['disable-dram-formula']:
         logging.error('You need to enable at least one formula')
         return
@@ -174,7 +195,10 @@ def run_smartwatts(args) -> None:
 
     def term_handler(_, __):
         supervisor.shutdown()
-        sys.exit(0)
+        if direct_call:
+            raise SmartwattsRuntimeException(0)
+        else:    
+            sys.exit(0)
 
     signal.signal(signal.SIGTERM, term_handler)
     signal.signal(signal.SIGINT, term_handler)
@@ -214,11 +238,17 @@ def run_smartwatts(args) -> None:
     except InitializationException as exn:
         logging.error('Actor initialization error: ' + exn.msg)
         supervisor.shutdown()
-        sys.exit(-1)
+        if direct_call:
+            raise SmartwattsRuntimeException(-1)
+        else:
+            sys.exit(-1)
     except PowerAPIException as exp:
         supervisor.shutdown()
         logging.error("PowerException Error error: %s", exp)
-        sys.exit(-1)
+        if direct_call:
+            raise SmartwattsRuntimeException(-1)
+        else:
+            sys.exit(-1)
 
     logging.info('SmartWatts is now running...')
     supervisor.monitor()
