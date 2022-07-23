@@ -147,7 +147,7 @@ def setup_dram_formula_actor(supervisor, fconf, route_table, report_filter, cpu_
 
 """
 Used to replace sys.exit call whens run_smartwatts is called directly from NodeWatts 
-msg will contain the return code.
+msg will contain the error message or None in case of exit with 0 return code
 """
 class SmartwattsRuntimeException(Exception):
     def __init__(self, msg, *args, **kwargs):
@@ -196,7 +196,7 @@ def run_smartwatts(args, direct_call=False) -> None:
     def term_handler(_, __):
         supervisor.shutdown()
         if direct_call:
-            raise SmartwattsRuntimeException(0)
+            raise SmartwattsRuntimeException(None)
         else:    
             sys.exit(0)
 
@@ -239,14 +239,14 @@ def run_smartwatts(args, direct_call=False) -> None:
         logging.error('Actor initialization error: ' + exn.msg)
         supervisor.shutdown()
         if direct_call:
-            raise SmartwattsRuntimeException(-1)
+            raise SmartwattsRuntimeException('Actor initialization error: ' + exn.msg)
         else:
             sys.exit(-1)
     except PowerAPIException as exp:
         supervisor.shutdown()
         logging.error("PowerException Error error: %s", exp)
         if direct_call:
-            raise SmartwattsRuntimeException(-1)
+            raise SmartwattsRuntimeException("PowerException Error error: %s", exp)
         else:
             sys.exit(-1)
 
